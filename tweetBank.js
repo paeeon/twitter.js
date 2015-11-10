@@ -8,7 +8,7 @@ var data = []; //will contain tweets
 var add = function(name, text) {
 	//each tweet is an object
 	//containing a name + text
-	data.push({name: name, text: text})
+	data.push({name: name, text: text, id: data.length})
 }
 
 var list = function() {
@@ -50,6 +50,14 @@ for(var i=0; i<10; i++) {
 	//PUSHES 10 FAKE NAMES + 10 FAKE TWEETS INTO DATA ARRAY
   module.exports.add( getFakeName(), getFakeTweet() );
 }
+
+
+
+
+
+module.exports.add("nimit", "hey boys");
+module.exports.add("nimit", "hey girls");
+module.exports.add("nimit", "hey children");
 
 
 
