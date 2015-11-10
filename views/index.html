@@ -1,0 +1,45 @@
+<!-- ORIGINAL CODE --> 
+<!-- <h1>{{ title }}</h1>
+<p>This is a bare-bones template.</p>
+<ul>
+{% for tweet in tweets %}
+  <li><strong>{{ tweet.name }}</strong> {{ tweet.tweet }}</li>
+{% endfor %}
+</ul> -->
+
+
+{% extends "layout.html" %}
+
+{% block content %}
+  
+  <div class="page-header">
+    <h1>Welcome to Twitter.js, Nimit!</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-3">
+      <img src="https://pbs.twimg.com/profile_images/2450268678/olxp11gnt09no2y2wpsh_normal.jpeg"><br>
+      <b>Your Name</b><br>
+      100 followers
+    </div>
+    <div class="col-md-9">
+    
+      <!-- display tweets here -->
+      {% for tweet in text %}
+        <li>{{tweet.text}}</li>
+      {% endfor %}
+      
+    </div>
+  </div>
+    
+{% endblock %}
+
+
+
+<!-- WE ARE GOING TO STICK THIS CUSTOM CONTENT INTO THE LAYOUT.  -->
+<!-- THIS IS WHAT WE WILL CONTINUALLY DO AS WE BUILD OUR SITE.  -->
+
+
+
+<!-- LAYOUT IS SOMETHING WE WANT ON EVERY PAGE.
+WITH SWIG WE CAN ADD THAT TO NEW MODULES WE MAKE
+(LIKE THIS INDEX.HTML RIGHT HERE) AND DISPLAY ALL IN ONE PAGE -->
