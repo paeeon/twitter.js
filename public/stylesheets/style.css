@@ -58,3 +58,16 @@ code {
   font-weight: bold;
 }
 
+.user-and-tweet {
+  overflow: auto;
+}
+
+.user-picture {
+  float: left;
+  padding-right: 10px;
+  margin-bottom: 20px;
+}
+
+.user-picture img {
+  width: 100px;
+}

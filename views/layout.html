@@ -37,7 +37,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Twitter.js</a>
+            <a class="navbar-brand" href="/">Twitter.js</a>
           </div>
           <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
@@ -60,11 +60,21 @@
       </div>
 
       <!-- Begin page content -->
-      <div id="page-content" class="container">
-         <!-- THIS IS WHERE WE ADD IN OUR INDEX.HTML OR ANY OTHER CONTENT -->
+      <div class="container">
+
+        <form action="/submit" method="POST">
+          <label for="name_field">Name:</label>
+          <input name="name" type="text" id="name_field" />
+
+          <label for="text_field">Text:</label>
+          <input name="text" type="text" id="text_field" style="width: 350px;" />
+
+          <input type="submit" value="Submit" />
+        </form>
+
         {% block content %}Welcome to Twitter.js{% endblock %}
       </div> <!-- end container -->
-      
+
     </div>
 
     <div id="footer">

@@ -1,17 +1,7 @@
-<!-- ORIGINAL CODE --> 
-<!-- <h1>{{ title }}</h1>
-<p>This is a bare-bones template.</p>
-<ul>
-{% for tweet in tweets %}
-  <li><strong>{{ tweet.name }}</strong> {{ tweet.tweet }}</li>
-{% endfor %}
-</ul> -->
-
-
 {% extends "layout.html" %}
 
 {% block content %}
-  
+
   <div class="page-header">
     <h1>Welcome to Twitter.js, Nimit!</h1>
   </div>
@@ -22,36 +12,20 @@
       100 followers
     </div>
     <div class="col-md-9">
-    
+
       <!-- display tweets here -->
-      {% for tweet in text %}
-        <li><a href= "/users/{{tweet.name}}"><strong>{{tweet.name}}</strong></a> - <a href="/users/{{tweet.name}}/tweets/{{tweet.id}}">{{tweet.text}}</a></li>
+      {% for tweet in tweets %}
+        <div class="user-and-tweet">
+          <div class="user-picture">
+            <a href="/users/{{tweet.user}}">
+              <img src="{{tweet.pictureUrl}}">
+            </a>
+          </div>
+          <a href="/users/{{tweet.user}}">{{tweet.user}}</a> - <a href="/users/{{tweet.name}}/tweets/{{tweet.id}}">{{tweet.text}}</a>
+        </div>
       {% endfor %}
-      
+
     </div>
   </div>
 
-{% if showForm %}
-  <form action="/submit" method="POST">
-    <label for="name_field">Name:</label>
-    <input name="name" type="text" id="name_field" />
-
-    <label for="text_field">Text:</label>
-    <input name="text" type="text" id="text_field" style="width: 350px;" />
-
-    <input type="submit" value="Submit" />
-  </form>
-  
-{% endif %}
-    
 {% endblock %}
-
-
-<!-- WE ARE GOING TO STICK THIS CUSTOM CONTENT INTO THE LAYOUT.  -->
-<!-- THIS IS WHAT WE WILL CONTINUALLY DO AS WE BUILD OUR SITE.  -->
-
-
-
-<!-- LAYOUT IS SOMETHING WE WANT ON EVERY PAGE.
-WITH SWIG WE CAN ADD THAT TO NEW MODULES WE MAKE
-(LIKE THIS INDEX.HTML RIGHT HERE) AND DISPLAY ALL IN ONE PAGE -->

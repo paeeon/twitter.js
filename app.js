@@ -1,46 +1,68 @@
-var express = require("express");
-var swig = require("swig");
-var routes = require("./routes/");
+// npm & node modules
+var express = require('express'),
+    morgan = require('morgan'),
+    swig = require('swig'),
+    bodyParser = require('body-parser'),
+    mime = require('mime'),
+    fs = require('fs'),
+    database = require('./models/index');
 
+// "constants" (not really) and our own modules
+var PORT = 1337,
+    app = express(),
+    routes = require('./routes/');
 
-var app = express();
+// Swig boilerplate
+app.set('views', __dirname + '/views'); // where to find views
+app.set('view engine', 'html'); // what file extension they have
+app.engine('html', swig.renderFile); // how to render html
+swig.setDefaults({cache: false}); // always re-render
 
-var server = app.listen(3000, function() {
-	console.log("Server listening on port, 3000");
-})
+// HTTP body parsing (JSON or URL-encoded) middleware
+app.use(bodyParser.urlencoded({ extended: true })); // for HTML form submit
+app.use(bodyParser.json()); // for AJAX (not used in this workshop)
 
+// logging middleware
+app.use(morgan('dev')); // logs req & res properties on response send
 
-// This is where all the magic happens!
-app.engine('html', swig.renderFile);
+// // manual logging — similar to what morgan is doing
+// app.use(function(req, res, next){
+//   res.on('finish', function(){ // when we send a response, whenever that is
+//     console.log(req.method, req.path, res.statusCode);
+//   });
+//   next();
+// });
 
-app.set('view engine', 'html');
-app.set('views', __dirname + '/views');
-
-var title = "An Example"
-var people = [{"name": "Tom"}, {"name": "Lily"}, {"name": "Joe"}]
-
-swig.setDefaults({ cache: false });
-
-
-
-
-
+// dynamic routing
 app.use('/', routes);
 
-// // OLD ROUTES:
-// app.use(function(req, res, next){
-// 	// console.log(req.method, req.url)
-// 	next()
-// })
+// static routing
+app.use(express.static(__dirname + '/public'));
 
+// // manually-written static file middleware
+// app.use(function(req, res, next) {
+//   console.log(req.path);
+//   var mimeType = mime.lookup(req.path);
+//   fs.readFile('./public/' + req.path, function(err, fileBuffer) {
+//     if(err) return next(); // if there is no file there, move on
+//     res.header('Content-Type', mimeType);
+//     res.send(fileBuffer);
+//   });
+// });
 
-// app.get("/", function(req, res) {
-// 	res.render("index", {title: title, people: people})
-// 	// res.send("Home page!");
-// })
+// if we got this far, we couldn't match the route, so send to error middleware
+app.use(function(req, res, next){
+  var err = new Error('could not find route');
+  err.status = 404;
+  next(err); // passing a truthy value to `next` goes to error middleware
+});
 
-// app.get("/news", function(req, res) {
-// 	res.send("Welcome to the news page");
-// })
+// a custom error-handling middleware function
+app.use(function(err, req, res, next){ // 4 params -> error-handling middleware
+  res.status(err.status || 500).send('ERROR: ' + err.message);
+});
 
-
+// start our server
+app.listen(PORT, function(){
+  console.log('Listening to port', PORT);
+});

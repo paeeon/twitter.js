@@ -1,85 +1,129 @@
 var express = require('express');
 var router = express.Router();
-var mime = require("mime")
-var fs = require("fs")
-var bodyParser = require("body-parser")
+// could use one line instead: var router = require('express').Router();
+var models = require('../models/index');
 
-//Same as: var router = require('express').Router();
+// Removing this line because we're using a database now
+// var tweetBank = require('../tweetBank');
 
-var tweetBank = require('../tweetBank');
+router.get('/', function (req, res) {
+  models.Tweet.findAll( {include: [models.User]} )
+  .then(function(tweets) {
+    var tweetArray = [];
+    tweets.forEach(function(tweet) {
+      var tweetObj = {
+        text: tweet.dataValues.tweet,
+        user: tweet.dataValues.User.dataValues.name,
+        pictureUrl: tweet.dataValues.User.dataValues.pictureUrl
+      };
+      tweetArray.push(tweetObj);
+    });
+    res.render('index', { tweets: tweetArray });
+  }, function(err) {
+    console.error(err);
+  });
+});
+
+// function createSimpleTweet (tweets) {
+//   console.log(tweets);
+//   var tweetArray = [];
+//   tweets.forEach(function(tweet) {
+//     var tweetObj = {
+//       text: tweet.dataValues.tweet,
+//       user: tweet.dataValues.User.dataValues.name,
+//       pictureUrl: tweet.dataValues.User.dataValues.pictureUrl
+//     };
+//     tweetArray.push(tweetObj);
+//   });
+//   return tweetArray;
+// }
 
 
 
-
-router.get('/', function(req, res) {
-	var tweets = tweetBank.list();
-	// tweets is a clone of the data array in tweetBank.js
-	res.render('index', {title: 'Twitter.js', text: tweets, showForm: true} );
-
+router.get('/users/:name', function(req, res) {
+  // req.params.name = "David";
+  models.User.findAll({
+    include: [models.Tweet],
+    where: {
+      name: req.params.name
+    }
+  })
+  .then(function(user){
+    // var tweetArray = createSimpleTweet(user[0].dataValues.Tweets);
+    var tweetArray = [];
+    user[0].dataValues.Tweets.forEach(function(tweet) {
+      var tweetObj = {
+        text: tweet.dataValues.tweet, 
+        user: user[0].dataValues.name,
+        pictureUrl: user[0].dataValues.pictureUrl
+      };
+      tweetArray.push(tweetObj);
+    });
+    res.render('index', { tweets: tweetArray });
+  })
+  .catch(function(err){
+    console.error(err);
+  });
 });
 
 
-// say that a client GET requests the path /users/nimit
-router.get( '/users/:name', function (req, res) {
-	var name = req.params.name
-    // console.log(name); // --> 'nimit'
-    var list = tweetBank.find({name: name})
-    res.render( 'index', { title: 'Twitter.js - Posts by '+ name, text: list } );
+
+// function getTweet (req, res){
+//   var tweets = tweetBank.find(req.params);
+//   res.render('index', { tweets: tweets });
+// }
+
+
+router.get('/users/:name/tweets/:id', function(req, res){
+  models.Tweet.findAll({
+    include: [models.User],
+    where: { 
+      id: req.params.id
+    }
+  })
+  .then(function(tweets){
+    var tweetArray = [];
+    var currentTweet = tweets[0];
+    var tweetObj = {
+      text: currentTweet.dataValues.tweet,
+      user: currentTweet.dataValues.User.dataValues.name,
+      pictureUrl: currentTweet.dataValues.User.dataValues.pictureUrl
+    };
+    tweetArray.push(tweetObj);
+    res.render('index', { tweets: tweetArray });
+    }, function(err) {
+      console.error(err);
+    });
 });
 
-router.get( '/users/:name/tweets/:id', function (req, res) {
-	var name = req.params.name;
-	var id = parseInt(req.params.id)
-    var list = tweetBank.find({name: name, id: id});
-    res.render( 'index', { title: 'Twitter.js - Posts by ' + name, text: list} );
-});
+// // note: this is not very REST-ful. We will talk about REST in the future.
+// router.post('/submit', function(req, res) {
+//   var name = req.body.name;
+//   var text = req.body.text;
+//   tweetBank.add(name, text);
+//   res.redirect('/');
+// });
 
-
-
-// static file middleware
-router.use(function(req, res, next) {
-  // console.log(req.path)
-  var mimeType = mime.lookup(req.path)
-  fs.readFile('./public/' + req.path, function(err, fileBuffer) {
-    if(err) return next()
-    res.header('Content-Type', mimeType)
-    res.send(fileBuffer)
+router.post('/submit', function(req,res){
+  models.User.findOrCreate({
+    include: [models.Tweet],
+    where: {
+      name: req.body.name
+      //text: req.body.text
+    }
+    // defaults: {
+    //   models.Tweet.dataValues.tweet: req.body.text
+    // }
+  }).then(function(user){
+    var currentUser = user[0];
+    models.Tweet.create(
+      {UserId: currentUser.dataValues.id,
+        tweet: req.body.text
+      }
+    );
+      res.redirect('/');
   })
 })
 
-
-
-
-//**************************
-//FOR PARSING THE BODY OF OUR TWEETS:
-
-// parse application/x-www-form-urlencoded
-router.use(bodyParser.urlencoded({ extended: false }))
-
-// parse application/json
-router.use(bodyParser.json())
-
-router.use(function (req, res) {
-  res.setHeader('Content-Type', 'text/plain')
-  res.end(JSON.stringify(req.body, null, 2))
-})
-
-//**************************
-
-
-//POST TWEETS:
-router.post("/submit", function(req, res) {
-	console.log(req.body)
-	tweetBank.add(req.body.name, req.body.text)
-})
-
-
-
-
-
 module.exports = router;
-
-
-
-
 
